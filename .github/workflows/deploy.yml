@@ -1,0 +1,41 @@
+name: Build and Deploy to OCI
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Log in to OCIR
+      run: |
+        echo "${{ secrets.OCIR_PASSWORD }}" | docker login iad.ocir.io -u "${{ secrets.OCIR_USERNAME }}" --password-stdin
+
+    - name: Build Docker image
+      run: |
+        docker build -t iad.ocir.io/idbjsjqzktkm/react-app:latest .
+
+    - name: Push to OCIR
+      run: |
+        docker push iad.ocir.io/idbjsjqzktkm/react-app:latest
+
+    - name: Set up OCI CLI
+      uses: oracle-actions/setup-oci-cli@v1
+
+    - name: Configure kubectl
+      run: |
+        oci ce cluster create-kubeconfig \
+          --cluster-id ${{ secrets.OCI_CLUSTER_ID }} \
+          --file $HOME/.kube/config \
+          --region us-ashburn-1 \
+          --token-version 2.0.0
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f k8s/
+        kubectl rollout status deployment/react-app
+        echo "Deployment completed!"

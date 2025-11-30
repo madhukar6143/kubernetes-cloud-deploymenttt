@@ -1,31 +1,10 @@
-name: Auto Deploy to OCI OKE
+- name: Deploy to OCI OKE
+  run: |
+    echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
+    export KUBECONFIG=$(pwd)/kubeconfig.yaml
 
-on:
-  push:
-    branches:
-      - main   # deploys automatically on pushes to main branch
+    # Test connection
+    kubectl get nodes
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-
-      - name: Deploy to OCI OKE
-        run: |
-          echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
-          export KUBECONFIG=$(pwd)/kubeconfig.yaml
-          kubectl apply -f k8/deployment.yaml
-          kubectl apply -f k8/service.yaml
-
-          
-          if [ -f k8/ingress.yaml ]; then
-            kubectl apply -f k8/ingress.yaml
-          fi
+    # Apply all YAML files safely
+    kubectl apply -f k8s/ --validate=false

@@ -16,9 +16,18 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
 
+      - name: Debug secret length
+        run: |
+          if [ -z "${{ secrets.OCIR_PASSWORD }}" ]; then
+            echo "OCIR_PASSWORD is EMPTY"
+          else
+            echo "OCIR_PASSWORD is SET"
+          fi
+
+
       - name: Log in to OCI Registry
         run: |
-          echo "${{ secrets  }}" | docker login iad.ocir.io \
+          echo "${{ secrets.OCIR_PASSWORD  }}" | docker login iad.ocir.io \
             -u "idbjsjqzktkm/oracleidentitycloudservice/madhukar.eppalapelly@gmail.com" \
             --password-stdin
 

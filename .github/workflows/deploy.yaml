@@ -32,35 +32,40 @@ jobs:
             -u "idbjsjqzktkm/madhukar.eppalapelly@gmail.com" \
             --password-stdin
 
-      # 4. Build & push Docker image
+      # 4. Build & push ONLY latest tag
       - name: Build & Push Docker Image
         run: |
-          IMAGE_BASE=iad.ocir.io/idbjsjqzktkm/react-app
-          TAG=${GITHUB_SHA::7}
-          docker build -t $IMAGE_BASE:$TAG -t $IMAGE_BASE:latest .
-          docker push $IMAGE_BASE:$TAG
-          docker push $IMAGE_BASE:latest
+          IMAGE=iad.ocir.io/idbjsjqzktkm/react-app:latest
+          echo "Building and pushing: $IMAGE"
+          docker build -t $IMAGE .
+          docker push $IMAGE
+          echo "✅ Image pushed successfully as: $IMAGE"
 
-      # 5. Install kubectl (explicit version)
+      # 5. Install kubectl
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
         with:
           version: v1.29.8
 
-      # 6. Configure kubectl for OKE (generates kubeconfig + sets KUBECONFIG)
+      # 6. Configure kubectl for OKE
       - name: Configure kubectl for OKE
         uses: oracle-actions/configure-kubectl-oke@v1.5.0
         with:
-          cluster: ${{ secrets.OCI_CLUSTER_ID }}
-          enablePrivateEndpoint: false
+          cluster-id: ${{ secrets.OCI_CLUSTER_ID }}
+          enable-private-endpoint: false
 
       # 7. Verify Kubernetes access
       - name: Verify Kubernetes Access
         run: |
-          echo "Using kubeconfig: $KUBECONFIG"
+          echo "=== Testing Kubernetes Connection ==="
+          kubectl config get-contexts
           kubectl get nodes
 
       # 8. Deploy manifests
       - name: Deploy to OKE
         run: |
+          echo "Applying Kubernetes manifests..."
           kubectl apply -f k8s/ --validate=false
+          
+          echo "Checking deployment status..."
+          kubectl get all -n default

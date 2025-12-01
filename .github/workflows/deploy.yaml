@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: Oracle 
+    environment: Oracle
 
     steps:
       - name: Checkout code
@@ -25,15 +25,26 @@ jobs:
             echo "OCIR_PASSWORD is SET"
           fi
 
-
       - name: Log in to OCI Registry
         run: |
-          docker login iad.ocir.io -u "idbjsjqzktkm/madhukar.eppalapelly@gmail.com" -p "90O{d9Jxg_rYtVn6:IoF"
+          docker login iad.ocir.io \
+            -u "idbjsjqzktkm/madhukar.eppalapelly@gmail.com" \
+            -p "${{ secrets.OCIR_PASSWORD }}"
 
       - name: Build and Push Docker Image
         run: |
           docker build -t iad.ocir.io/idbjsjqzktkm/react-app:latest .
           docker push iad.ocir.io/idbjsjqzktkm/react-app:latest
+
+      #####################################################
+      #  FIX: Install OCI CLI so kubeconfig exec plugin works
+      #####################################################
+      - name: Install OCI CLI
+        run: |
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
+          chmod +x install.sh
+          ./install.sh --accept-all-defaults
+          echo "$HOME/bin" >> $GITHUB_PATH
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3

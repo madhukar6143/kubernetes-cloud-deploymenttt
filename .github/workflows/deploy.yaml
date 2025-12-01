@@ -47,7 +47,7 @@ jobs:
       - name: Set up Kubeconfig
         run: |
           mkdir -p ~/.kube
-          echo '${{ secrets.KUBECONFIG_CONTENT }}' > kubeconfig.yaml
+          echo '${{ secrets.KUBECONFIG }}' > kubeconfig.yaml
           chmod 600 kubeconfig.yaml
           echo "KUBECONFIG=$PWD/kubeconfig.yaml" >> $GITHUB_ENV
           export KUBECONFIG=$PWD/kubeconfig.yaml

@@ -44,7 +44,7 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
         with:
-          version: "1.30.0"
+          version: v1.29.8   # or 'latest'
 
       - name: Configure kubectl for OKE
         uses: oracle-actions/configure-kubectl-oke@v1.5.0

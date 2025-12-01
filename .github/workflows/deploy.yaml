@@ -36,11 +36,12 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
 
-      # 6. Install OCI CLI (needed for kubeconfig exec plugin)
       - name: Install OCI CLI
         run: |
-          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh | bash
-          export PATH=$PATH:$HOME/lib/oracle-cli/bin:$PATH
+          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
+          chmod +x install.sh
+          ./install.sh --accept-all-defaults
+          echo "$HOME/bin" >> $GITHUB_PATH
 
       # 7. Set up kubeconfig
       - name: Set up Kubeconfig

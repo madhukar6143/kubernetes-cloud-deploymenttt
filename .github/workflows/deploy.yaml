@@ -46,7 +46,7 @@ jobs:
       - name: Configure kubectl for OKE
         uses: oracle-actions/configure-kubectl-oke@v1.4.0
         with:
-          cluster-id: ${{ secrets.OKE_CLUSTER_OCID }}
+          cluster-id: ${{ secrets.OCI_CLUSTER_ID }}
         env:
           OCI_CLI_USER:        ${{ secrets.OCI_USER_OCID }}
           OCI_CLI_TENANCY:     ${{ secrets.OCI_TENANCY_OCID }}

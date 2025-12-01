@@ -28,7 +28,7 @@ jobs:
       - name: Log in to OCI Registry
         run: |
           docker login iad.ocir.io -u "idbjsjqzktkm/madhukar.eppalapelly@gmail.com" -p "90O{d9Jxg_rYtVn6:IoF"
-          
+
       - name: Build and Push Docker Image
         run: |
           docker build -t iad.ocir.io/idbjsjqzktkm/react-app:latest .
@@ -43,4 +43,4 @@ jobs:
         run: |
           echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
           export KUBECONFIG=$(pwd)/kubeconfig.yaml
-          kubectl apply -f k8/
+          kubectl apply -f k8/s

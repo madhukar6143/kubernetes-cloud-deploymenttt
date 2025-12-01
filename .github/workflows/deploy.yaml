@@ -38,4 +38,4 @@ jobs:
           echo "KUBECONFIG=$PWD/kubeconfig.yaml" >> $GITHUB_ENV
 
       - name: Deploy to OKE
-        run: kubectl apply -f k8s/
+        run: kubectl apply -f k8s/ --kubeconfig kubeconfig.yaml --validate=false

@@ -51,8 +51,11 @@ jobs:
         with:
           version: 'latest'
 
-
-
-      - name: Deploy
+      - name: Set up Kubeconfig
         run: |
-          kubectl apply -f k8s/ --validate=false
+          mkdir -p ~/.kube
+          echo "$KUBECONFIG_FILE" > ~/.kube/config
+
+      - name: Apply Manifests
+        run: kubectl apply -f k8s/ --validate=false
+

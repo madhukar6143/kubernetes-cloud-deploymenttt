@@ -33,14 +33,18 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Set up Kubeconfig from Secret
+      - name: Set up Kubeconfig
         run: |
           mkdir -p ~/.kube
-          echo '${{ secrets.KUBECONFIG_CONTENT }}' > ~/.kube/config
-          chmod 600 ~/.kube/config
+          echo '${{ secrets.KUBECONFIG_CONTENT }}' > kubeconfig.yaml
+          chmod 600 kubeconfig.yaml
+          
+          # Set KUBECONFIG environment variable
+          echo "KUBECONFIG=$PWD/kubeconfig.yaml" >> $GITHUB_ENV
 
       - name: Verify Kubernetes Access
         run: |
+          echo "KUBECONFIG is set to: $KUBECONFIG"
           kubectl cluster-info
           kubectl get nodes
 

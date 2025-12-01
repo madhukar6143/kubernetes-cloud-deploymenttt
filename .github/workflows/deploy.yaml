@@ -43,14 +43,16 @@ jobs:
           ./install.sh --accept-all-defaults
           echo "$HOME/bin" >> $GITHUB_PATH
 
-      # 7. Set up kubeconfig
-      - name: Set up Kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo '${{ secrets.KUBECONFIG }}' > kubeconfig.yaml
-          chmod 600 kubeconfig.yaml
-          echo "KUBECONFIG=$PWD/kubeconfig.yaml" >> $GITHUB_ENV
-          export KUBECONFIG=$PWD/kubeconfig.yaml
+      - name: Configure kubectl for OKE
+        uses: oracle-actions/configure-kubectl-oke@v1.4.0
+        with:
+          cluster-id: ${{ secrets.OKE_CLUSTER_OCID }}
+        env:
+          OCI_CLI_USER:        ${{ secrets.OCI_USER_OCID }}
+          OCI_CLI_TENANCY:     ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_CLI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_CLI_KEY_CONTENT: ${{ secrets.OCI_PRIVATE_KEY }}
+          OCI_CLI_REGION:      ${{ secrets.OCI_REGION }}
 
       # 8. Verify Kubernetes access
       - name: Verify Kubernetes Access

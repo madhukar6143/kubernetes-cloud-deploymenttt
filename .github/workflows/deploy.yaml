@@ -31,11 +31,55 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
 
-      - name: Configure Kubeconfig
+      - name: Set up Kubeconfig with Debug
         run: |
-          echo "${{ secrets.KUBECONFIG_CONTENT }}" > kubeconfig.yaml
+          mkdir -p ~/.kube
+          # Create kubeconfig with CORRECT kind
+          cat > kubeconfig.yaml << 'EOF'
+          apiVersion: v1
+          clusters:
+          - cluster:
+              certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURpVENDQW5HZ0F3SUJBZ0lSQU5WaUMrclZhNENPcWpnVkIra0xTZ0F3RFFZSktvWklodmNOQVFFTEJRQXcKWGpFUE1BMEdBMVVFQXd3R1N6aHpJRU5CTVFzd0NRWURWUVFHRXdKVlV6RVBNQTBHQTFVRUJ3d0dRWFZ6ZEdsdQpNUTh3RFFZRFZRUUtEQVpQY21GamJHVXhEREFLQmdOVkJBc01BMDlqYVRFT01Bd0dBMVVFQ0F3RlZHVjRZWE13CkhoY05NalV4TVRJNU1EUXlNakU0V2hjTk16QXhNVEk1TURReU1qRTRXakJlTVE4d0RRWURWUVFEREFaTE9ITWcKUTBFeEN6QUpCZ05WQkFZVEFsVlRNUTh3RFFZRFZRUUhEQVpCZFhOMGFXNHhEekFOQmdOVkJBb01Cazl5WVdOcwpaVEVNTUFvR0ExVUVDd3dEVDJOcE1RNHdEQVlEVlFRSURBVlVaWGhoY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCCkJRQURnZ0VQQURDQ0FRb0NnZ0VCQU5JN2VJaE0xbTBCRVZGRlpjcGRPS1dDMHo3WjErdHJ0TUNlUkdwMVFsbXYKMjlVQ3hkNkRBeFh2OW13L2ZlY1JCT2VEa2l0eDlTUXZRU0VvYS9FUnZ3b2V0UUxwM0Q2bGh2cDdheGY4MXNaTQo4N2lzQStucVo1ejJ4NnU3U0ZBbGVKVXpDR2NDdFgwZkNSaXJBajNmZGVUUDZlaUVhZE9FeU1aVklYaTZqYkpLCjVWZ1NEeU53VVVqR0xVTldxNGhuaHN6QVVrQ2RiTENhTFh1Z2kxbHJiSXljdEhjclpMRXpLS0pnbjJpSm1XemEKdGFycjVnbFJHVnY5djFrZFNZSTMxYlZyMENSSm9xZEhremNZQjh3VmxIblpKS3VlbmtZMHRaK2NJTWxabTFmRgpIUkF2VzliQTVTanN0aEFSUitxd25YNFpualdkdkN1Y3VGeXlHZ21kTHpVQ0F3RUFBYU5DTUVBd0R3WURWUjBUCkFRSC9CQVV3QXdFQi96QU9CZ05WSFE4QkFmOEVCQU1DQVFZd0hRWURWUjBPQkJZRUZEOFZ6N29VbDBxNXRmK0wKbHVBbkpkMHdieCt2TUEwR0NTcUdTSWIzRFFFQkN3VUFBNElCQVFDNU9HOHNiMlZUN2FoSGk0WWw2ZUlMc1NpKwp4dngyTTZoWkc4NkFKVFJQLzBmb043YWhyRG5IOUtneGdHdWR3cDJSeWNiZ29kbXdTNjJvUWpqZnU0U2tmSERjCkNWZWd6SjFORmUwRjJLWWpSUFhkTjA5MnFPaHoxT2dkK1VEZlJWL1FhOVo5L3lUK1duV3lUVWNSWTJJYWFub3AKKzEzV1AyV29YZWlhL3JhL05FZlV2SXlvemV2WUUzdlVCdHpFcTRycy81KzNGcXF5OUNEM2tHTEFmajhtYXVBWQpUdkNFb3I0RFhuQzhpTlpwV1NaYzM5b1JpR2IwaGxBbjFaTUtHRjJQQys3b01kWlhMOFg1RFc2b1NMbXFnNTNTCnMybmNFaTlFOXpCYUN5cDZnWWlwMVhVSTRIeVNtb1lzY2VWVjdacHN2WElqNGpaRUtwRUplQnFXcWFtYQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+              server: https://150.230.166.45:6443
+            name: cluster-ctqffgfubnq
+          contexts:
+          - context:
+              cluster: cluster-ctqffgfubnq
+              user: user-ctqffgfubnq
+            name: context-ctqffgfubnq
+          current-context: context-ctqffgfubnq
+          kind: Config
+          users:
+          - name: user-ctqffgfubnq
+            user:
+              exec:
+                apiVersion: client.authentication.k8s.io/v1beta1
+                args:
+                - ce
+                - cluster
+                - generate-token
+                - --cluster-id
+                - ocid1.cluster.oc1.iad.aaaaaaaaavxo7q5rjikpq6noyymaiefgklvt57ky7iwfbgudoctqffgfubnq
+                - --region
+                - us-ashburn-1
+                command: oci
+                env: []
+          EOF
+          
           chmod 600 kubeconfig.yaml
+          
+          # Set KUBECONFIG in multiple ways to ensure it's picked up
           echo "KUBECONFIG=$PWD/kubeconfig.yaml" >> $GITHUB_ENV
+          export KUBECONFIG=$PWD/kubeconfig.yaml
+          
+          echo "=== Verifying kubeconfig ==="
+          cat kubeconfig.yaml | grep "kind:"
 
-      - name: Deploy to OKE
-        run: kubectl apply -f k8s/ --kubeconfig kubeconfig.yaml --validate=false
+      - name: Verify Kubernetes Access
+        run: |
+          echo "=== Testing KUBECONFIG ==="
+          echo "KUBECONFIG: $KUBECONFIG"
+          echo "=== Testing with explicit --kubeconfig ==="
+          kubectl --kubeconfig=kubeconfig.yaml config get-contexts
+          kubectl --kubeconfig=kubeconfig.yaml cluster-info
+          kubectl --kubeconfig=kubeconfig.yaml get nodes

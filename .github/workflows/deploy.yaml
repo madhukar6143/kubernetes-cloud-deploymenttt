@@ -39,8 +39,13 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Deploy to OCI OKE
+      - name: Write kubeconfig from secret
         run: |
           echo "${{ secrets.KUBECONFIG }}" > kubeconfig.yaml
+          export KUBECONFIG=$(pwd)/kubeconfig.yaml
+          kubectl config get-contexts
+
+      - name: Deploy
+        run: |
           export KUBECONFIG=$(pwd)/kubeconfig.yaml
           kubectl apply -f k8s/

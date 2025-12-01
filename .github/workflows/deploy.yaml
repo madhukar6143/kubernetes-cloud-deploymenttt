@@ -33,39 +33,16 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Install OCI CLI
-        run: |
-          curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh -o install.sh
-          chmod +x install.sh
-          ./install.sh --accept-all-defaults
-          echo "$HOME/bin" >> $GITHUB_PATH
-          $HOME/bin/oci --version
-
-      - name: Configure OCI CLI
-        run: |
-          mkdir -p ~/.oci
-          cat > ~/.oci/config << EOF
-          [DEFAULT]
-          user=${{ secrets.OCI_USER_OCID }}
-          fingerprint=${{ secrets.OCI_API_KEY_FINGERPRINT }}
-          tenancy=${{ secrets.OCI_TENANCY_OCID }}
-          region=${{ secrets.OCI_REGION }}
-          key_file=~/.oci/oci_api_key.pem
-          EOF
-          
-          echo "${{ secrets.OCI_API_KEY }}" > ~/.oci/oci_api_key.pem
-          chmod 600 ~/.oci/oci_api_key.pem
-          
-          # Test OCI configuration
-          $HOME/bin/oci os ns get
-
-      - name: Set up Kubeconfig
+      - name: Set up Kubeconfig from Secret
         run: |
           mkdir -p ~/.kube
-          echo '${{ secrets.KUBECONFIG }}' > ~/.kube/config
+          echo '${{ secrets.KUBECONFIG_CONTENT }}' > ~/.kube/config
           chmod 600 ~/.kube/config
 
       - name: Verify Kubernetes Access
         run: |
           kubectl cluster-info
           kubectl get nodes
+
+      - name: Apply Manifests
+        run: kubectl apply -f k8s/ --validate=false

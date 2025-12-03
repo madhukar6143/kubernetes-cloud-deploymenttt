@@ -62,6 +62,12 @@ jobs:
           cluster: ${{ secrets.OCI_CLUSTER_ID }}
           enablePrivateEndpoint: false
 
+      - name: Update Kubernetes deployment
+        run: |
+          kubectl set image deployment/react-app react-app=iad.ocir.io/idbjsjqzktkm/react-app:${{ github.sha }}
+          kubectl rollout status deployment/react-app
+
+          
       # 7. Verify Kubernetes access
       - name: Verify Kubernetes Access
         run: |

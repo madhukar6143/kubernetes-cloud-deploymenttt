@@ -32,8 +32,7 @@ jobs:
             -u "idbjsjqzktkm/madhukar.eppalapelly@gmail.com" \
             --password-stdin
 
-
-
+      # 4. Build & push Docker image tagged with Git SHA
       - name: Build & Push Docker Image
         run: |
           IMAGE=iad.ocir.io/idbjsjqzktkm/react-app:${{ github.sha }}
@@ -46,35 +45,29 @@ jobs:
           
           echo "✅ Image pushed as: $IMAGE"
 
-
-
-
-      # 5. Install kubectl (explicit version)
+      # 5. Install kubectl
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
         with:
           version: v1.29.8
 
-      # 6. Configure kubectl for OKE (generates kubeconfig + sets KUBECONFIG)
+      # 6. Configure kubectl for OKE
       - name: Configure kubectl for OKE
         uses: oracle-actions/configure-kubectl-oke@v1.5.0
         with:
           cluster: ${{ secrets.OCI_CLUSTER_ID }}
           enablePrivateEndpoint: false
 
-      - name: Update Kubernetes deployment
+      # 7. Update Kubernetes deployment to use new image
+      - name: Update Deployment
         run: |
-          kubectl set image deployment/react-app react-app=iad.ocir.io/idbjsjqzktkm/react-app:${{ github.sha }}
+          echo "Setting deployment image to ${IMAGE}"
+          kubectl set image deployment/react-app react-app=$IMAGE
           kubectl rollout status deployment/react-app
 
-          
-      # 7. Verify Kubernetes access
-      - name: Verify Kubernetes Access
+      # 8. Optional: Verify
+      - name: Verify Deployment
         run: |
-          echo "Using kubeconfig: $KUBECONFIG"
-          kubectl get nodes
-
-      # 8. Deploy manifests
-      - name: Deploy to OKE
-        run: |
-          kubectl apply -f k8s/ --validate=false
+          kubectl get deploy react-app -o wide
+          kubectl get pods -o wide
+          kubectl get svc react-service

@@ -32,6 +32,8 @@ jobs:
             -u "idbjsjqzktkm/madhukar.eppalapelly@gmail.com" \
             --password-stdin
 
+
+
       - name: Build & Push Docker Image
         run: |
           IMAGE=iad.ocir.io/idbjsjqzktkm/react-app:${{ github.sha }}
@@ -44,10 +46,7 @@ jobs:
           
           echo "✅ Image pushed as: $IMAGE"
 
-      - name: Update Kubernetes deployment
-        run: |
-          kubectl set image deployment/react-app react-app=iad.ocir.io/idbjsjqzktkm/react-app:${{ github.sha }}
-          kubectl rollout status deployment/react-app
+
 
 
       # 5. Install kubectl (explicit version)
